@@ -9,13 +9,13 @@ export const thuNoSchema = z.object({
 });
 
 const overdueBefore = () => {
-  const date = new Date();
-  date.setDate(date.getDate() - 30);
-  return date;
+  const date = new Date(); // Lay ngay hien tai cuathiet bi
+  date.setDate(date.getDate() - 30); // lui 30 ngay de tao moc kiem tra qua han hay chua
+  return date; // phieu nhap truoc moc nay duoc cem la qua han 30 ngay
 };
 
 const debtOf = (invoice: { tongTien: unknown; soTienDaThanhToan: unknown }) =>
-  Math.max(0, Number(invoice.tongTien) - Number(invoice.soTienDaThanhToan));
+  Math.max(0, Number(invoice.tongTien) - Number(invoice.soTienDaThanhToan)); // con no = tong tien - so tien da tra
 
 export async function layDanhSachKhachHang(q = '') {
   const rows = await prisma.khachHang.findMany({
@@ -27,7 +27,9 @@ export async function layDanhSachKhachHang(q = '') {
   return rows.map(({ hoaDons, ...customer }) => ({
     ...customer,
     tongNo: hoaDons.reduce((sum, invoice) => sum + debtOf(invoice), 0),
-    noQuaHan: hoaDons.filter((invoice) => invoice.ngayBan < limit).reduce((sum, invoice) => sum + debtOf(invoice), 0),
+    noQuaHan: hoaDons
+      .filter((invoice) => invoice.ngayBan < limit) // chi lay phieu nhap co ngay nhao truoc 30 ngay so voi nagy hien tai cua thiet bi
+      .reduce((sum, invoice) => sum + debtOf(invoice), 0), // cong so tien con no cua cac phieu da qua han
     soHoaDonNo: hoaDons.filter((invoice) => debtOf(invoice) > 0).length,
   }));
 }
@@ -49,8 +51,11 @@ export async function layChiTietCongNo(khachHangId: string | number) {
   if (!customer) throw new Error('NOT_FOUND');
   const limit = overdueBefore();
   const hoaDons = customer.hoaDons.map((invoice) => ({
-    ...invoice, tongTien: Number(invoice.tongTien), soTienDaThanhToan: Number(invoice.soTienDaThanhToan),
-    conNo: debtOf(invoice), quaHan: invoice.ngayBan < limit && debtOf(invoice) > 0,
+    ...invoice,
+    tongTien: Number(invoice.tongTien),
+    soTienDaThanhToan: Number(invoice.soTienDaThanhToan),
+    conNo: debtOf(invoice),
+    quaHan: invoice.ngayBan < limit && debtOf(invoice) > 0, // Quá hạn khi hóa đơn cũ hơn 30 ngày và khách vẫn còn nợ
   }));
   return {
     khachHang: { id: customer.id, ten: customer.ten, sdt: customer.sdt, diaChi: customer.diaChi },

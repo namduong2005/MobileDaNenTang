@@ -5,7 +5,7 @@ import Constants from 'expo-constants';
  *
  * Khi test trên điện thoại thật (không phải emulator):
  *   - KHÔNG dùng localhost hoặc 127.0.0.1
- *   - Dùng IP LAN của máy tính chạy backend, VD: http://192.168.1.100:8080/api
+ *   - Dùng IP LAN của máy tính chạy backend, VD: http://192.168.1.100:5000/api
  *   - Kiểm tra IP: Windows dùng ipconfig, Mac/Linux dùng ifconfig
  *   - Cập nhật trong app.json > extra > API_BASE_URL rồi restart expo
  */

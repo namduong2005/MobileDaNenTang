@@ -162,7 +162,7 @@ model ChiTietPhieuNhap {
 
   phieuNhap PhieuNhap @relation(fields: [phieuNhapId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_ChiTietPhieuNhap_PhieuNhap")
   bienThe   BienThe   @relation(fields: [bienTheId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_ChiTietPhieuNhap_BienThe")
-  loHang    LoHang?
+  loHangs   LoHang[]
 
   @@map("ChiTietPhieuNhap")
 }
@@ -261,7 +261,7 @@ model ChiTietHoaDon {
 model LoHang {
   id                 Int       @id @default(autoincrement())
   bienTheId          Int
-  chiTietPhieuNhapId Int?      @unique
+  chiTietPhieuNhapId Int?
   maLo               String?   @db.NVarChar(100)
   ngaySanXuat        DateTime? @db.Date
   hanSuDung          DateTime? @db.Date

@@ -175,6 +175,11 @@ export default function SanPhamForm() {
                 <small style={{ color: id ? '#64748b' : '#059669', fontSize: '11px', marginTop: '4px', lineHeight: 1.3, display: 'block' }}>
                   {id ? 'Chỉ cập nhật qua Nhập hàng / Kiểm kê' : 'Tồn kho ban đầu = 0, sẽ được cập nhật qua Nhập hàng'}
                 </small>
+                {id && (
+                  <button type="button" className="btn ghost small" style={{ marginTop: '6px' }} onClick={() => navigate('/kiem-ke')}>
+                    Điều chỉnh bằng kiểm kê
+                  </button>
+                )}
               </div>
               <InputField label="Cảnh báo" type="number" min="0" value={bienThe.nguongCanhBao} onFocus={(e) => e.currentTarget.select()} onChange={(e) => updateBienThe(index, { nguongCanhBao: e.target.value })} placeholder="5" />
               <button type="button" className="btn danger" onClick={() => removeBienThe(index)} disabled={bienThes.length === 1}>Xóa</button>

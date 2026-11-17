@@ -16,30 +16,31 @@ export const taoKiemKeSchema = z.object({
 
 export type TaoKiemKeInput = z.infer<typeof taoKiemKeSchema>;
 
-async function dongBoLoSauKiemKe(tx: any, bienTheId: number, chenhLech: number, phieuId: number, giaNhap: number) {
-  if (chenhLech === 0) return;
-  if (chenhLech > 0) {
-    await tx.loHang.create({ data: {
-      bienTheId, maLo: `KIEM-KE-${phieuId}-${bienTheId}`, ngayNhap: new Date(),
-      soLuongNhap: chenhLech, soLuongCon: chenhLech, giaNhap, trangThai: 'DANG_BAN',
-    } });
-    return;
-  }
-
+async function dongBoLoSauKiemKe(tx: any, bienTheId: number, soLuongThucTe: number, phieuId: number, giaNhap: number) {
   const lots = await tx.loHang.findMany({ where: { bienTheId, soLuongCon: { gt: 0 } } });
   lots.sort((a: any, b: any) => {
     const expiryA = a.hanSuDung ? new Date(a.hanSuDung).valueOf() : Number.MAX_SAFE_INTEGER;
     const expiryB = b.hanSuDung ? new Date(b.hanSuDung).valueOf() : Number.MAX_SAFE_INTEGER;
     return expiryA - expiryB || new Date(a.ngayNhap).valueOf() - new Date(b.ngayNhap).valueOf();
   });
-  let remaining = Math.abs(chenhLech);
+  const tongTheoLo = lots.reduce((sum: number, lot: any) => sum + lot.soLuongCon, 0);
+  if (soLuongThucTe > tongTheoLo) {
+    const soLuongBoSung = soLuongThucTe - tongTheoLo;
+    await tx.loHang.create({ data: {
+      bienTheId, maLo: `KIEM-KE-${phieuId}-${bienTheId}`, ngayNhap: new Date(),
+      soLuongNhap: soLuongBoSung, soLuongCon: soLuongBoSung, giaNhap, trangThai: 'DANG_BAN',
+    } });
+    return;
+  }
+
+  let remaining = tongTheoLo - soLuongThucTe;
   for (const lot of lots) {
     if (!remaining) break;
     const remove = Math.min(remaining, lot.soLuongCon);
     await tx.loHang.update({ where: { id: lot.id }, data: { soLuongCon: { decrement: remove } } });
     remaining -= remove;
   }
-  if (remaining) throw new Error('Tồn theo lô không đủ để điều chỉnh; hãy kiểm tra lại dữ liệu kho');
+  if (remaining) throw new Error('Không thể đồng bộ tồn theo lô; hãy kiểm tra lại dữ liệu kho');
 }
 
 export async function taoPhieuKiemKe(nguoiTaoId: number | string, data: TaoKiemKeInput) {
@@ -159,7 +160,7 @@ export async function duyetPhieu(id: number | string, nguoiDuyetId: number | str
       const bt = await tx.bienThe.findUnique({ where: { id: ct.bienTheId } });
       if (!bt) throw new Error(`Biến thể #${ct.bienTheId} không tồn tại`);
       const truoc = bt.soLuongTon;
-      await dongBoLoSauKiemKe(tx, bt.id, ct.soLuongThucTe - truoc, phieu.id, Number(bt.giaNhap));
+      await dongBoLoSauKiemKe(tx, bt.id, ct.soLuongThucTe, phieu.id, Number(bt.giaNhap));
       await tx.bienThe.update({ where: { id: bt.id }, data: { soLuongTon: ct.soLuongThucTe } });
       await tx.giaoDichKho.create({ data: { bienTheId: bt.id, loaiGiaoDich: 'kiem_ke', soLuongThayDoi: ct.soLuongThucTe - truoc,
         soLuongTruoc: truoc, soLuongSau: ct.soLuongThucTe, thamChieuLoai: 'PhieuKiemKe', thamChieuId: phieu.id,

@@ -67,7 +67,7 @@ export default function PhieuNhapForm() {
 
         <div className="grid two">
           <label className="field"><span>Thanh toán nhà cung cấp</span><select value={hinhThucTT} onChange={(e) => setHinhThucTT(e.target.value as typeof hinhThucTT)}><option value="tienmat">Trả ngay bằng tiền mặt</option><option value="chuyenkhoan">Trả ngay bằng chuyển khoản</option><option value="congno">Mua nợ / trả một phần</option></select></label>
-          {hinhThucTT === 'congno' && <InputField label="Số tiền trả trước" type="number" min={0} max={total} value={soTienDaThanhToan} onChange={(e) => setSoTienDaThanhToan(Number(e.target.value))} />}
+          {hinhThucTT === 'congno' && <InputField label="Số tiền trả trước" type="number" min={0} max={total > 0 ? total : undefined} step={10000} value={soTienDaThanhToan} onChange={(e) => setSoTienDaThanhToan(Number(e.target.value))} />}
         </div>
       </div>
       <form className="card-form" onSubmit={submit}>

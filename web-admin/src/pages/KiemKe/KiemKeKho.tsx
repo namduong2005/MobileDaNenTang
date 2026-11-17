@@ -165,6 +165,10 @@ export default function KiemKeKho() {
   };
 
   const rows = tab === 'pending' ? pending.data : history.data;
+  const selectedHasMissingReason = selected?.chiTiets?.some((detail) => {
+    const diff = detail.chenhLech ?? detail.soLuongThucTe - detail.soLuongHeThong;
+    return diff !== 0 && !detail.nguyenNhanChenhLech?.trim();
+  }) ?? false;
 
   return (
     <section className="page">
@@ -367,11 +371,18 @@ export default function KiemKeKho() {
               </div>
             </div>
             <div className="modal-actions inventory-modal-actions">
+              {selectedHasMissingReason && (
+                <small className="inventory-missing-reason">
+                  Phiếu cũ thiếu nguyên nhân chênh lệch nên không thể duyệt; hãy từ chối và tạo phiếu mới.
+                </small>
+              )}
               <button className="btn ghost" onClick={() => setSelected(null)}>Đóng</button>
               {selected.trangThai === 'cho_duyet' && (
                 <>
                   <button className="btn danger" onClick={() => void reject()}>Từ chối phiếu</button>
-                  <button className="btn primary" onClick={() => void approve()}>Xác nhận điều chỉnh kho</button>
+                  <button className="btn primary" disabled={selectedHasMissingReason} onClick={() => void approve()}>
+                    Xác nhận điều chỉnh kho
+                  </button>
                 </>
               )}
             </div>

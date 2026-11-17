@@ -57,16 +57,16 @@ export default function Dashboard() {
   }, []);
 
   const choosePeriod = (value: 'today' | 'week' | 'month') => {
-    const today = new Date();
+    const today = new Date();// Lấy ngày hiện tại
     const date = (input: Date) => input.toISOString().slice(0, 10);
-    const end = date(today);
-    const start = new Date(today);
-    if (value === 'week') start.setDate(start.getDate() - 6);
+    const end = date(today);// Ngày kết thúc là hôm nay
+    const start = new Date(today);//bắt đầu cũng là từ ngày hôm nay(trong nagyf)
+    if (value === 'week') start.setDate(start.getDate() - 6);// Lùi 6 ngày + hôm nay = 7 ngày
     if (value === 'month') start.setDate(start.getDate() - 29);
     setPeriod(value);
     setFrom(date(start));
     setTo(end);
-    void load(date(start), end);
+    void load(date(start), end);// Gọi API lấy dữ liệu trong khoảng ngày
   };
 
   if (loading) {
